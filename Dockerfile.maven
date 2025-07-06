@@ -1,0 +1,16 @@
+FROM maven:3.9.4-eclipse-temurin-17 
+
+# Set the working directory inside Docker container
+WORKDIR /app 
+
+# Copy the pom.xml and pom.xml.bak
+COPY pom.xml ./
+
+# Download dependencies 
+RUN mvn dependency:go-offline -B 
+
+COPY . . 
+
+CMD [ "tail", "-f", "/dev/null" ]
+
+

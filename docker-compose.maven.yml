@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  maven-build:
+    build:
+      context: .
+      dockerfile: Dockerfile.maven
+    container_name: maven-task1
+    volumes:
+      - .:/app
+      - ./pom.xml:/app/pom.xml
+      - maven-cache:/root/.m2
+    working_dir: /app
+    stdin_open: true
+    tty: true
+
+volumes:
+  maven-cache:

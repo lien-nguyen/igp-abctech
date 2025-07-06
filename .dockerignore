@@ -1,0 +1,26 @@
+target/
+
+jenkinsfile
+
+.git/
+.gitignore
+
+.classpath
+.project
+.settings/
+.vscode/
+
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Backup files
+*.bak
+
+README.md
+*.md
+
+# Cache directories
+.cache/
+.npm/
+.m2/
