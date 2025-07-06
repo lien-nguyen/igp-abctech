@@ -8,7 +8,7 @@ pipeline
             steps 
             {
                 echo 'Checking out code...'
-                git 'https://github.com/lien-nguyen/abctechnologies.git'
+                git 'https://github.com/lien-nguyen/igp-abctech.git'
             }
         }
         stage('Code Compile') 
