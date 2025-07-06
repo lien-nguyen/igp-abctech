@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile.maven
     container_name: maven-task1
     volumes:
-      - .:/app
+      - :/app
       - ./pom.xml:/app/pom.xml
       - maven-cache:/root/.m2
     working_dir: /app
