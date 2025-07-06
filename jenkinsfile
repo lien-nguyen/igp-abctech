@@ -1,0 +1,39 @@
+pipeline
+{
+    agent any 
+    stages 
+    {
+        stage('Code Checkout') 
+        {
+            steps 
+            {
+                echo 'Checking out code...'
+                git 'https://github.com/lien-nguyen/abctechnologies.git'
+            }
+        }
+        stage('Code Compile') 
+        {
+            steps 
+            {
+                echo 'Compiling...'
+                sh 'mvn compile'
+            }
+        }
+        stage('Unit Test') 
+        {
+            steps 
+            {
+                echo 'Testing...'
+                sh 'mvn test'
+            }
+        }
+        stage('Code Packaging') 
+        {
+            steps 
+            {
+                echo 'Packaging...'
+                sh 'mvn package'
+            }
+        }
+    }
+}
