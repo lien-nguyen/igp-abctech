@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Install Java 17 on the machine (recommended for Jenkins)
 sudo apt update
 sudo apt install fontconfig openjdk-17-jdk
