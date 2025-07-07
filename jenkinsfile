@@ -8,7 +8,7 @@ pipeline
     {
         stage('Code Checkout') 
         {
-            agent { label 'master' }  // Run on master node
+            agent { label 'built-in' }  // Run on built-in master node
             steps 
             {
                 echo 'Checking out code on master node...'
