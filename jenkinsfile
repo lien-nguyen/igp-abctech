@@ -48,7 +48,7 @@ pipeline
                 sshPublisher(
                     publishers: [
                         sshPublisherDesc(
-                            configName: 'docker-host',
+                            configName: 'dockerhost',
                             transfers: [
                                 sshTransfer(
                                     sourceFiles: 'target/*.war',
@@ -74,7 +74,7 @@ pipeline
                 sshPublisher(
                     publishers: [
                         sshPublisherDesc(
-                            configName: 'docker-host',
+                            configName: 'dockerhost',
                             transfers: [
                                 sshTransfer(
                                     execCommand: '''
@@ -100,7 +100,7 @@ pipeline
                 sshPublisher(
                     publishers: [
                         sshPublisherDesc(
-                            configName: 'docker-host',
+                            configName: 'dockerhost',
                             transfers: [
                                 sshTransfer(
                                     execCommand: '''
@@ -132,7 +132,7 @@ pipeline
                 sshPublisher(
                     publishers: [
                         sshPublisherDesc(
-                            configName: 'docker-host',
+                            configName: 'dockerhost',
                             transfers: [
                                 sshTransfer(
                                     execCommand: '''
@@ -164,7 +164,7 @@ pipeline
                         sshPublisher(
                             publishers: [
                                 sshPublisherDesc(
-                                    configName: 'docker-host',
+                                    configName: 'dockerhost',
                                     transfers: [
                                         sshTransfer(
                                             execCommand: """
