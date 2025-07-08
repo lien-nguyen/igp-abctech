@@ -70,7 +70,7 @@ pipeline
             steps 
             {
                 echo 'Building Docker image on Docker host...'
-                // Build Docker image on Docker host
+                // Build Docker image and immediately tag for Docker Hub
                 sshPublisher(
                     publishers: [
                         sshPublisherDesc(
@@ -81,8 +81,14 @@ pipeline
                                         cd /home/dockeradmin/build
                                         echo "Building Docker image v1..."
                                         sudo docker build -f Dockerfile.tomcat -t abctech-app:v1 .
-                                        echo "Docker image built successfully!"
+                                        
+                                        echo "Tagging image for Docker Hub..."
+                                        sudo docker tag abctech-app:v1 thibichliennguyen/abctech-app:v1
+                                        sudo docker tag abctech-app:v1 thibichliennguyen/abctech-app:latest
+                                        
+                                        echo "Docker image built and tagged successfully!"
                                         sudo docker images | grep abctech-app
+                                        sudo docker images | grep thibichliennguyen/abctech-app
                                     '''
                                 )
                             ]
@@ -124,34 +130,6 @@ pipeline
             }
         }
         stage('Push to Docker Hub') 
-        {
-            steps 
-            {
-                echo 'Pushing image to Docker Hub...'
-                // Tag and push image to Docker Hub with credentials
-                sshPublisher(
-                    publishers: [
-                        sshPublisherDesc(
-                            configName: 'dockerhost',
-                            transfers: [
-                                sshTransfer(
-                                    execCommand: '''
-                                        cd /home/dockeradmin/build
-                                        echo "Tagging image for Docker Hub..."
-                                        sudo docker tag abctech-app:v1 thibichliennguyen/abctech-app:v1
-                                        sudo docker tag abctech-app:v1 thibichliennguyen/abctech-app:latest
-                                        
-                                        echo "Image tagged successfully!"
-                                        sudo docker images | grep thibichliennguyen/abctech-app
-                                    '''
-                                )
-                            ]
-                        )
-                    ]
-                )
-            }
-        }
-        stage('Docker Hub Login & Push') 
         {
             steps 
             {
