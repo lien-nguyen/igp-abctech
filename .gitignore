@@ -6,3 +6,6 @@
 .vscode/
 .project
 archived/
+
+# Documentation files
+PIPELINE_SETUP.md

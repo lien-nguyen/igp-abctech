@@ -1,4 +1,6 @@
+# Exclude target directory but keep WAR files
 target/
+!target/*.war
 
 jenkinsfile
 
@@ -11,14 +13,18 @@ jenkinsfile
 .vscode/
 
 Dockerfile*
+!Dockerfile.tomcat
 docker-compose*.yml
-.dockerignore
+
+# Project folders to exclude
+archived/
 
 # Backup files
 *.bak
 
 README.md
 *.md
+PIPELINE_SETUP.md
 
 # Cache directories
 .cache/

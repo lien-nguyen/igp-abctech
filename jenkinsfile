@@ -1,55 +1,193 @@
 pipeline
 {
-    agent none  // Don't use any default agent
-    tools {
+    agent any 
+    tools 
+    {
         maven 'Maven-3.9.10'
     }
     stages 
     {
         stage('Code Checkout') 
         {
-            agent { label 'built-in' }  // Run on built-in master node
             steps 
             {
-                echo 'Checking out code on master node...'
+                echo 'Checking out code...'
                 git branch: 'main', url: 'https://github.com/lien-nguyen/igp-abctech.git'
-                // Archive the workspace to share with slave
-                stash includes: '**/*', name: 'source-code'
             }
         }
         stage('Code Compile') 
         {
-            agent { label 'build-agent' }  // Run on build-agent
             steps 
             {
-                echo 'Compiling on build-agent node...'
-                // Retrieve the source code from master
-                unstash 'source-code'
+                echo 'Compiling...'
                 sh 'mvn compile'
             }
         }
         stage('Unit Test') 
         {
-            agent { label 'build-agent' }  // Run on build-agent
             steps 
             {
-                echo 'Testing on build-agent node...'
-                // Get the source code (including compiled classes)
-                unstash 'source-code'
-                sh 'mvn compile test'
+                echo 'Testing...'
+                sh 'mvn test'
             }
         }
         stage('Code Packaging') 
         {
-            agent { label 'build-agent' }  // Run on build-agent
             steps 
             {
-                echo 'Packaging on build-agent node...'
-                // Get the source code
-                unstash 'source-code'
-                sh 'mvn compile package'
-                // Archive the built artifacts / save the WAR file
-                archiveArtifacts artifacts: 'target/*.war', fingerprint: true
+                echo 'Packaging...'
+                sh 'mvn package'
+            }
+        }
+        stage('Transfer to Docker Host') 
+        {
+            steps 
+            {
+                echo 'Transferring files to Docker host...'
+                // Transfer WAR file and Dockerfile to Docker host
+                sshPublisher(
+                    publishers: [
+                        sshPublisherDesc(
+                            configName: 'docker-host',
+                            transfers: [
+                                sshTransfer(
+                                    sourceFiles: 'target/*.war',
+                                    remoteDirectory: 'build',
+                                    execCommand: 'mkdir -p /home/dockeradmin/build'
+                                ),
+                                sshTransfer(
+                                    sourceFiles: 'Dockerfile.tomcat',
+                                    remoteDirectory: 'build'
+                                )
+                            ]
+                        )
+                    ]
+                )
+            }
+        }
+        stage('Build Docker Image') 
+        {
+            steps 
+            {
+                echo 'Building Docker image on Docker host...'
+                // Build Docker image on Docker host
+                sshPublisher(
+                    publishers: [
+                        sshPublisherDesc(
+                            configName: 'docker-host',
+                            transfers: [
+                                sshTransfer(
+                                    execCommand: '''
+                                        cd /home/dockeradmin/build
+                                        echo "Building Docker image v1..."
+                                        docker build -f Dockerfile.tomcat -t abctech-app:v1 .
+                                        echo "Docker image built successfully!"
+                                        docker images | grep abctech-app
+                                    '''
+                                )
+                            ]
+                        )
+                    ]
+                )
+            }
+        }
+        stage('Deploy Container') 
+        {
+            steps 
+            {
+                echo 'Deploying container on Docker host...'
+                // Deploy container on Docker host
+                sshPublisher(
+                    publishers: [
+                        sshPublisherDesc(
+                            configName: 'docker-host',
+                            transfers: [
+                                sshTransfer(
+                                    execCommand: '''
+                                        echo "Stopping old container..."
+                                        docker stop abctech-v1-container || true
+                                        docker rm abctech-v1-container || true
+                                        
+                                        echo "Starting new v1 container..."
+                                        docker run -d -p 8080:8080 --name abctech-v1-container abctech-app:v1
+                                        
+                                        echo "Container deployed successfully!"
+                                        docker ps | grep abctech-v1-container
+                                        
+                                        echo "Application available at: http://172.31.20.154:8080/ABCtechnologies-1.0/"
+                                    '''
+                                )
+                            ]
+                        )
+                    ]
+                )
+            }
+        }
+        stage('Push to Docker Hub') 
+        {
+            steps 
+            {
+                echo 'Pushing image to Docker Hub...'
+                // Tag and push image to Docker Hub with credentials
+                sshPublisher(
+                    publishers: [
+                        sshPublisherDesc(
+                            configName: 'docker-host',
+                            transfers: [
+                                sshTransfer(
+                                    execCommand: '''
+                                        cd /home/dockeradmin/build
+                                        echo "Tagging image for Docker Hub..."
+                                        docker tag abctech-app:v1 liennguyen/abctech-app:v1
+                                        docker tag abctech-app:v1 liennguyen/abctech-app:latest
+                                        
+                                        echo "Image tagged successfully!"
+                                        docker images | grep liennguyen/abctech-app
+                                    '''
+                                )
+                            ]
+                        )
+                    ]
+                )
+            }
+        }
+        stage('Docker Hub Login & Push') 
+        {
+            steps 
+            {
+                echo 'Logging into Docker Hub and pushing...'
+                // Login and push using Jenkins credentials
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
+                                                    passwordVariable: 'DOCKER_PASSWORD', 
+                                                    usernameVariable: 'DOCKER_USERNAME')]) {
+                        sshPublisher(
+                            publishers: [
+                                sshPublisherDesc(
+                                    configName: 'docker-host',
+                                    transfers: [
+                                        sshTransfer(
+                                            execCommand: """
+                                                echo "Logging into Docker Hub..."
+                                                echo '$DOCKER_PASSWORD' | docker login -u '$DOCKER_USERNAME' --password-stdin
+                                                
+                                                echo "Pushing to Docker Hub..."
+                                                docker push liennguyen/abctech-app:v1
+                                                docker push liennguyen/abctech-app:latest
+                                                
+                                                echo "Image successfully pushed to Docker Hub!"
+                                                echo "Docker Hub URL: https://hub.docker.com/r/liennguyen/abctech-app"
+                                                
+                                                echo "Logging out from Docker Hub..."
+                                                docker logout
+                                            """
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    }
+                }
             }
         }
     }
