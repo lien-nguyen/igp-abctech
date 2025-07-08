@@ -138,11 +138,11 @@ pipeline
                                     execCommand: '''
                                         cd /home/dockeradmin/build
                                         echo "Tagging image for Docker Hub..."
-                                        docker tag abctech-app:v1 liennguyen/abctech-app:v1
-                                        docker tag abctech-app:v1 liennguyen/abctech-app:latest
+                                        docker tag abctech-app:v1 thibichliennguyen/abctech-app:v1
+                                        docker tag abctech-app:v1 thibichliennguyen/abctech-app:latest
                                         
                                         echo "Image tagged successfully!"
-                                        docker images | grep liennguyen/abctech-app
+                                        docker images | grep thibichliennguyen/abctech-app
                                     '''
                                 )
                             ]
@@ -172,11 +172,11 @@ pipeline
                                                 echo '$DOCKER_PASSWORD' | docker login -u '$DOCKER_USERNAME' --password-stdin
                                                 
                                                 echo "Pushing to Docker Hub..."
-                                                docker push liennguyen/abctech-app:v1
-                                                docker push liennguyen/abctech-app:latest
+                                                docker push thibichliennguyen/abctech-app:v1
+                                                docker push thibichliennguyen/abctech-app:latest
                                                 
                                                 echo "Image successfully pushed to Docker Hub!"
-                                                echo "Docker Hub URL: https://hub.docker.com/r/liennguyen/abctech-app"
+                                                echo "Docker Hub URL: https://hub.docker.com/r/thibichliennguyen/abctech-app"
                                                 
                                                 echo "Logging out from Docker Hub..."
                                                 docker logout
