@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Usage:
+# run: $ bash create_user.sh
+# press the public key from your Ansible control node, then press ENTER and CTRL+D
+
 set -e
 
 echo "=== Target Host: ansibleadmin Setup Script ==="
