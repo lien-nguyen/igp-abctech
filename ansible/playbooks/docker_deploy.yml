@@ -3,7 +3,7 @@
   hosts: docker-hosts
   become: yes
   vars:
-    tomcat_image: tomcat:9.0-jdk11
+    tomcat_image: tomcat:11.0-jdk17
     war_source: /home/ansibleadmin/ABCtechnologies-1.0.war
     war_dest: /tmp/ABCtechnologies-1.0.war
     container_name: tomcat-app
