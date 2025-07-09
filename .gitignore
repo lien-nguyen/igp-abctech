@@ -9,3 +9,6 @@ archived/
 
 # Documentation files
 PIPELINE_SETUP.md
+
+# Monitoring folder (keep local, don't track)
+monitoring/
