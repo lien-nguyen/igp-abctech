@@ -1,0 +1,32 @@
+---
+- name: Complete CI/CD Pipeline - Build, Docker, and K8s Deployment
+  hosts: localhost
+  gather_facts: no
+  vars:
+    app_name: abctechnologies
+    app_version: "{{ build_number | default('latest') }}"
+    docker_registry: "{{ docker_registry_url | default('localhost:5000') }}"
+    workspace_path: "{{ workspace | default('/var/lib/jenkins/workspace/ABCTech-Pipeline') }}"
+    
+  tasks:
+    - name: Set build timestamp
+      set_fact:
+        build_timestamp: "{{ ansible_date_time.epoch }}"
+        
+    - name: Display pipeline information
+      debug:
+        msg: |
+          Starting CI/CD Pipeline
+          Application: {{ app_name }}
+          Version: {{ app_version }}
+          Build Timestamp: {{ build_timestamp }}
+          Workspace: {{ workspace_path }}
+
+- name: Build and Deploy to Docker
+  import_playbook: docker-deploy.yml
+  vars:
+    war_file_path: "{{ workspace_path }}/target/ABCtechnologies-1.0.war"
+
+- name: Deploy to Kubernetes
+  import_playbook: k8s-deploy.yml
+  when: deploy_to_k8s | default(true) | bool

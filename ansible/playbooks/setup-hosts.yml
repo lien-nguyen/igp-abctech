@@ -1,0 +1,94 @@
+---
+- name: Setup Docker Host for CI/CD
+  hosts: docker-hosts
+  become: yes
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+      
+    - name: Install required packages
+      package:
+        name:
+          - docker.io
+          - docker-compose
+          - python3-pip
+          - python3-docker
+          - curl
+          - wget
+        state: present
+        
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+        
+    - name: Add ansibleadmin to docker group
+      user:
+        name: ansibleadmin
+        groups: docker
+        append: yes
+        
+    - name: Install Docker Python module
+      pip:
+        name: docker
+        state: present
+        
+    - name: Create application directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - /opt/abctechnologies
+        - /opt/docker-registry
+        
+    - name: Setup local Docker registry
+      docker_container:
+        name: registry
+        image: registry:2
+        state: started
+        restart_policy: always
+        ports:
+          - "5000:5000"
+        volumes:
+          - /opt/docker-registry:/var/lib/registry
+
+- name: Setup Kubernetes Master
+  hosts: k8s-masters
+  become: yes
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+      
+    - name: Install required packages
+      package:
+        name:
+          - python3-pip
+          - python3-kubernetes
+          - curl
+          - wget
+        state: present
+        
+    - name: Install Kubernetes Python module
+      pip:
+        name:
+          - kubernetes
+          - pyyaml
+        state: present
+        
+    - name: Create kubeconfig directory for ansibleadmin
+      file:
+        path: /home/ansibleadmin/.kube
+        state: directory
+        owner: ansibleadmin
+        group: ansibleadmin
+        mode: '0755'
+        
+    - name: Copy kubeconfig (you need to manually copy this)
+      debug:
+        msg: "Please manually copy /etc/kubernetes/admin.conf to /home/ansibleadmin/.kube/config and set proper ownership"

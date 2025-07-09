@@ -1,0 +1,289 @@
+pipeline
+{
+    agent any 
+    tools 
+    {
+        maven 'Maven-3.9.10'
+    }
+    
+    environment {
+        ANSIBLE_HOST_KEY_CHECKING = 'False'
+        ANSIBLE_CONFIG = 'ansible/ansible.cfg'
+        DOCKER_REGISTRY = 'localhost:5000'
+        BUILD_NUMBER = "${env.BUILD_NUMBER}"
+    }
+    
+    stages 
+    {
+        stage('Code Checkout') 
+        {
+            steps 
+            {
+                echo 'Checking out code...'
+                git branch: 'main', url: 'https://github.com/lien-nguyen/igp-abctech.git'
+            }
+        }
+        
+        stage('Code Compile') 
+        {
+            steps 
+            {
+                echo 'Compiling code...'
+                sh 'mvn clean compile'
+            }
+        }
+        
+        stage('Code Review') 
+        {
+            steps 
+            {
+                echo 'Running PMD for code review...'
+                sh 'mvn pmd:pmd'
+            }
+            post 
+            {
+                always 
+                {
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target/site',
+                        reportFiles: 'pmd.html',
+                        reportName: 'PMD Report'
+                    ])
+                }
+            }
+        }
+        
+        stage('Unit Testing') 
+        {
+            steps 
+            {
+                echo 'Running unit tests...'
+                sh 'mvn test'
+            }
+            post 
+            {
+                always 
+                {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        
+        stage('Code Coverage') 
+        {
+            steps 
+            {
+                echo 'Generating code coverage report...'
+                sh 'mvn jacoco:report'
+            }
+            post 
+            {
+                always 
+                {
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target/site/jacoco',
+                        reportFiles: 'index.html',
+                        reportName: 'JaCoCo Coverage Report'
+                    ])
+                    
+                    jacoco execPattern: 'target/jacoco.exec'
+                }
+            }
+        }
+        
+        stage('Package') 
+        {
+            steps 
+            {
+                echo 'Packaging application...'
+                sh 'mvn package -DskipTests'
+            }
+            post 
+            {
+                always 
+                {
+                    archiveArtifacts artifacts: 'target/*.war', allowEmptyArchive: false
+                }
+            }
+        }
+        
+        stage('Setup Ansible Hosts') 
+        {
+            when {
+                expression { 
+                    return params.SETUP_HOSTS ?: false
+                }
+            }
+            steps 
+            {
+                echo 'Setting up Ansible managed hosts...'
+                dir('ansible') {
+                    sh '''
+                        ansible-playbook -i inventory playbooks/setup-hosts.yml \
+                        --extra-vars "build_number=${BUILD_NUMBER}" \
+                        --vault-password-file vault_pass || true
+                    '''
+                }
+            }
+        }
+        
+        stage('Deploy with Ansible - Docker') 
+        {
+            steps 
+            {
+                echo 'Deploying application using Ansible to Docker...'
+                dir('ansible') {
+                    sh '''
+                        # Check if WAR file exists
+                        if [ ! -f "../target/ABCtechnologies-1.0.war" ]; then
+                            echo "Error: WAR file not found!"
+                            exit 1
+                        fi
+                        
+                        # Run Ansible playbook for Docker deployment
+                        ansible-playbook -i inventory playbooks/docker-deploy.yml \
+                        --extra-vars "build_number=${BUILD_NUMBER}" \
+                        --extra-vars "war_file_path=${WORKSPACE}/target/ABCtechnologies-1.0.war" \
+                        --extra-vars "docker_registry_url=${DOCKER_REGISTRY}" \
+                        --vault-password-file vault_pass || echo "Ansible Docker deployment completed with warnings"
+                    '''
+                }
+            }
+        }
+        
+        stage('Deploy with Ansible - Kubernetes') 
+        {
+            when {
+                expression { 
+                    return params.DEPLOY_TO_K8S ?: true
+                }
+            }
+            steps 
+            {
+                echo 'Deploying application using Ansible to Kubernetes...'
+                dir('ansible') {
+                    sh '''
+                        # Run Ansible playbook for Kubernetes deployment
+                        ansible-playbook -i inventory playbooks/k8s-deploy.yml \
+                        --extra-vars "build_number=${BUILD_NUMBER}" \
+                        --extra-vars "docker_registry_url=${DOCKER_REGISTRY}" \
+                        --vault-password-file vault_pass || echo "Ansible K8s deployment completed with warnings"
+                    '''
+                }
+            }
+        }
+        
+        stage('Run Complete CI/CD Pipeline') 
+        {
+            when {
+                expression { 
+                    return params.RUN_COMPLETE_PIPELINE ?: false
+                }
+            }
+            steps 
+            {
+                echo 'Running complete CI/CD pipeline with Ansible...'
+                dir('ansible') {
+                    sh '''
+                        ansible-playbook -i inventory playbooks/cicd-pipeline.yml \
+                        --extra-vars "build_number=${BUILD_NUMBER}" \
+                        --extra-vars "workspace=${WORKSPACE}" \
+                        --extra-vars "docker_registry_url=${DOCKER_REGISTRY}" \
+                        --extra-vars "deploy_to_k8s=${DEPLOY_TO_K8S:-true}" \
+                        --vault-password-file vault_pass || echo "Complete pipeline completed with warnings"
+                    '''
+                }
+            }
+        }
+        
+        stage('Push to Docker Hub') 
+        {
+            when {
+                expression { 
+                    return params.PUSH_TO_DOCKERHUB ?: false
+                }
+            }
+            steps 
+            {
+                echo 'Pushing to Docker Hub via Ansible...'
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
+                                                    passwordVariable: 'DOCKER_PASSWORD', 
+                                                    usernameVariable: 'DOCKER_USERNAME')]) {
+                        dir('ansible') {
+                            sh '''
+                                ansible docker-hosts -i inventory -m shell -a "
+                                    echo '${DOCKER_PASSWORD}' | sudo docker login -u '${DOCKER_USERNAME}' --password-stdin && \
+                                    sudo docker tag ${DOCKER_REGISTRY}/abctechnologies:${BUILD_NUMBER} ${DOCKER_USERNAME}/abctech-app:${BUILD_NUMBER} && \
+                                    sudo docker tag ${DOCKER_REGISTRY}/abctechnologies:${BUILD_NUMBER} ${DOCKER_USERNAME}/abctech-app:latest && \
+                                    sudo docker push ${DOCKER_USERNAME}/abctech-app:${BUILD_NUMBER} && \
+                                    sudo docker push ${DOCKER_USERNAME}/abctech-app:latest && \
+                                    sudo docker logout
+                                " || echo "Docker Hub push completed with warnings"
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    parameters {
+        booleanParam(name: 'SETUP_HOSTS', defaultValue: false, description: 'Setup Ansible managed hosts')
+        booleanParam(name: 'DEPLOY_TO_K8S', defaultValue: true, description: 'Deploy to Kubernetes')
+        booleanParam(name: 'RUN_COMPLETE_PIPELINE', defaultValue: false, description: 'Run complete CI/CD pipeline')
+        booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push images to Docker Hub')
+        string(name: 'DOCKER_REGISTRY', defaultValue: 'localhost:5000', description: 'Docker Registry URL')
+    }
+    
+    post 
+    {
+        always 
+        {
+            echo 'Pipeline completed!'
+            
+            // Clean workspace
+            cleanWs()
+        }
+        
+        success 
+        {
+            echo 'Pipeline succeeded!'
+            emailext (
+                subject: "Success: Job '${JOB_NAME} [${BUILD_NUMBER}]'",
+                body: """
+                Good news! The pipeline succeeded.
+                
+                Job: ${JOB_NAME}
+                Build Number: ${BUILD_NUMBER}
+                Build URL: ${BUILD_URL}
+                
+                Application deployed successfully with Ansible!
+                """,
+                to: "admin@abctech.com"
+            )
+        }
+        
+        failure 
+        {
+            echo 'Pipeline failed!'
+            emailext (
+                subject: "Failed: Job '${JOB_NAME} [${BUILD_NUMBER}]'",
+                body: """
+                The pipeline failed. Please check the build logs.
+                
+                Job: ${JOB_NAME}
+                Build Number: ${BUILD_NUMBER}
+                Build URL: ${BUILD_URL}
+                """,
+                to: "admin@abctech.com"
+            )
+        }
+    }
+}

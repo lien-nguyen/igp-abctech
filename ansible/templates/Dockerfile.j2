@@ -1,0 +1,25 @@
+FROM tomcat:9.0-jdk11-openjdk-slim
+
+LABEL maintainer="ABCtechnologies"
+LABEL version="{{ app_version }}"
+LABEL description="ABCtechnologies Web Application"
+
+# Remove default webapps
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+# Copy WAR file
+COPY ABCtechnologies-1.0.war /usr/local/tomcat/webapps/ROOT.war
+
+# Set environment variables
+ENV CATALINA_OPTS="-Xmx512m -Xms256m"
+ENV JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/ || exit 1
+
+# Start Tomcat
+CMD ["catalina.sh", "run"]

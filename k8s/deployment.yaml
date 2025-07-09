@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abctechnologies-deployment
+  namespace: abctech
+  labels:
+    app: abctechnologies
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: abctechnologies
+  template:
+    metadata:
+      labels:
+        app: abctechnologies
+        version: v1
+    spec:
+      containers:
+      - name: abctechnologies
+        image: localhost:5000/abctechnologies:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: JAVA_OPTS
+          value: "-Xmx512m -Xms256m"
+        - name: CATALINA_OPTS
+          value: "-Xmx512m -Xms256m"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: logs
+          mountPath: /usr/local/tomcat/logs
+      volumes:
+      - name: logs
+        emptyDir: {}
+      restartPolicy: Always
+      imagePullPolicy: Always
