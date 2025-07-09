@@ -1,0 +1,38 @@
+---
+- name: Build and run Tomcat container with WAR
+  hosts: docker-hosts
+  become: yes
+  vars:
+    tomcat_image: tomcat:9.0-jdk11
+    war_source: /home/ansibleadmin/ABCtechnologies-1.0.war
+    war_dest: /tmp/ABCtechnologies-1.0.war
+    container_name: tomcat-app
+    host_port: 32768
+    container_port: 8080
+  tasks:
+    - name: Pull Tomcat image
+      community.docker.docker_image:
+        name: "{{ tomcat_image }}"
+        source: pull
+
+    - name: Copy WAR file to Docker host
+      copy:
+        src: "{{ war_source }}"
+        dest: "{{ war_dest }}"
+
+    - name: Remove existing container if present
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        state: absent
+        force_kill: yes
+
+    - name: Run Tomcat container with WAR
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ tomcat_image }}"
+        state: started
+        ports:
+          - "{{ host_port }}:{{ container_port }}"
+        volumes:
+          - "{{ war_dest }}:/usr/local/tomcat/webapps/abc.war:ro"
+        restart_policy: always
