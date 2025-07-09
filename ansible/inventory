@@ -1,15 +1,23 @@
+docker-server ansible_host={{ DOCKER_HOST_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ DOCKER_SSH_KEY }}
+
 [docker-hosts]
-docker-server ansible_host=<DOCKER_HOST_IP> ansible_user=ansibleadmin ansible_ssh_private_key_file=~/.ssh/id_rsa
-
-[k8s-masters]
-k8s-master ansible_host=<K8S_MASTER_IP> ansible_user=ansibleadmin ansible_ssh_private_key_file=~/.ssh/id_rsa
-
-[k8s-workers]
-k8s-worker1 ansible_host=<K8S_WORKER1_IP> ansible_user=ansibleadmin ansible_ssh_private_key_file=~/.ssh/id_rsa
-k8s-worker2 ansible_host=<K8S_WORKER2_IP> ansible_user=ansibleadmin ansible_ssh_private_key_file=~/.ssh/id_rsa
+docker-server ansible_host={{ DOCKER_HOST_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ DOCKER_SSH_KEY }}
 
 [jenkins-servers]
-jenkins-server ansible_host=<JENKINS_HOST_IP> ansible_user=ansibleadmin ansible_ssh_private_key_file=~/.ssh/id_rsa
+jenkins-server ansible_host={{ JENKINS_HOST_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ JENKINS_SSH_KEY }}
+
+[prometheus-grafana]
+prometheus-grafana ansible_host={{ PROMETHEUS_GRAFANA_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ PROMETHEUS_GRAFANA_SSH_KEY }}
+
+[tomcat-servers]
+tomcat-server ansible_host={{ TOMCAT_SERVER_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ TOMCAT_SERVER_SSH_KEY }}
+
+[k8s-masters]
+k8s-master ansible_host={{ K8S_MASTER_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ K8S_MASTER_SSH_KEY }}
+
+[k8s-workers]
+k8s-worker1 ansible_host={{ K8S_WORKER1_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ K8S_WORKER1_SSH_KEY }}
+k8s-worker2 ansible_host={{ K8S_WORKER2_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ K8S_WORKER2_SSH_KEY }}
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3

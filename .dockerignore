@@ -30,3 +30,6 @@ PIPELINE_SETUP.md
 .cache/
 .npm/
 .m2/
+
+# Ignore Ansible environment file
+ansible.env
