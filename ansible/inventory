@@ -1,23 +1,21 @@
-docker-server ansible_host={{ DOCKER_HOST_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ DOCKER_SSH_KEY }}
 
 [docker-host]
-docker-server ansible_host={{ DOCKER_HOST_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ DOCKER_SSH_KEY }}
-
-[jenkins-servers]
-jenkins-server ansible_host={{ JENKINS_HOST_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ JENKINS_SSH_KEY }}
-
-[prometheus-grafana]
-prometheus-grafana ansible_host={{ PROMETHEUS_GRAFANA_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ PROMETHEUS_GRAFANA_SSH_KEY }}
+docker-host ansible_host=172.31.20.154 ansible_user=ansibleadmin ansible_ssh_private_key_file=/home/ansibleadmin/.ssh/id_ed25519
 
 [tomcat-servers]
-tomcat-server ansible_host={{ TOMCAT_SERVER_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ TOMCAT_SERVER_SSH_KEY }}
+tomcat-server ansible_host=172.31.17.179 ansible_user=ansibleadmin ansible_ssh_private_key_file=/home/ansibleadmin/.ssh/id_ed25519
+
+[ansible-host]
+ansible-host ansible_host=172.31.18.103 ansible_user=ansibleadmin ansible_ssh_private_key_file=/home/ansibleadmin/.ssh/id_ed25519
 
 [k8s-masters]
-k8s-master ansible_host={{ K8S_MASTER_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ K8S_MASTER_SSH_KEY }}
+k8s-master ansible_host=172.31.19.183 ansible_user=ansibleadmin ansible_ssh_private_key_file=/home/ansibleadmin/.ssh/id_ed25519
 
-[k8s-workers]
-k8s-worker1 ansible_host={{ K8S_WORKER1_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ K8S_WORKER1_SSH_KEY }}
-k8s-worker2 ansible_host={{ K8S_WORKER2_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ K8S_WORKER2_SSH_KEY }}
+[prometheus-grafana]
+prometheus-grafana ansible_host=172.31.29.239 ansible_user=ansibleadmin ansible_ssh_private_key_file=/home/ansibleadmin/.ssh/id_ed25519
+
+[jenkins-servers]
+jenkins-server ansible_host=172.31.23.250 ansible_user=ansibleadmin ansible_ssh_private_key_file=/home/ansibleadmin/.ssh/id_ed25519
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
