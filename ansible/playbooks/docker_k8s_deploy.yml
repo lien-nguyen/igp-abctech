@@ -6,7 +6,7 @@
     dockerhub_username: "{{ dockerhub_username }}"
     dockerhub_password: "{{ dockerhub_password }}"
     image_name: "{{ dockerhub_username }}/abc-tomcat-app:latest"
-    war_source: /home/ansibleadmin/ABCtechnologies-1.0.war
+    war_source: /var/lib/jenkins/workspace/Task4-CICD-Deploy-with-Ansible/target/ABCtechnologies-1.0.war
     build_dir: /tmp/docker_build
     dockerfile_src: /home/ansibleadmin/Dockerfile
     k8s_manifest: /home/ansibleadmin/deployment.yaml
