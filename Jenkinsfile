@@ -58,8 +58,8 @@ pipeline {
                                                 passwordVariable: 'DOCKER_PASSWORD', 
                                                 usernameVariable: 'DOCKER_USERNAME')]) {
                         sh '''
-                            ansible-playbook -i ansible/inventory ansible/playbooks/docker_k8s_deploy.yml \
-                            --extra-vars "dockerhub_username=${DOCKER_USERNAME} dockerhub_password=${DOCKER_PASSWORD}"
+                            ansible-playbook -i ansible/inventory ansible/playbooks/k8s-deploy.yml \
+                            --extra-vars "docker_registry_url=${DOCKER_USERNAME} build_number=latest"
                         '''
                     }
                 }

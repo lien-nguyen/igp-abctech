@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: abctechnologies
-        image: localhost:5000/abctechnologies:latest
+        image: ${DOCKER_USERNAME}/abc-tomcat-app:latest
         ports:
         - containerPort: 8080
           name: http
@@ -51,11 +51,5 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
-        volumeMounts:
-        - name: logs
-          mountPath: /usr/local/tomcat/logs
-      volumes:
-      - name: logs
-        emptyDir: {}
       restartPolicy: Always
       imagePullPolicy: Always

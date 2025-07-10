@@ -1,6 +1,6 @@
 ---
 - name: Setup Docker Host for CI/CD
-  hosts: docker-hosts
+  hosts: docker-host
   become: yes
   tasks:
     - name: Update package cache
