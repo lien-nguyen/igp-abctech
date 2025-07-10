@@ -1,0 +1,54 @@
+---
+- name: Build Docker image, push to Docker Hub, and deploy to Kubernetes
+  hosts: docker-host
+  become: yes
+  vars:
+    dockerhub_username: "<your_dockerhub_username>"
+    dockerhub_password: "<your_dockerhub_password>"
+    image_name: "<your_dockerhub_username>/abc-tomcat-app:latest"
+    war_source: /home/ansibleadmin/ABCtechnologies-1.0.war
+    build_dir: /tmp/docker_build
+    dockerfile_src: /home/ansibleadmin/Dockerfile
+    k8s_manifest: /home/ansibleadmin/deployment.yaml
+  tasks:
+    - name: Ensure build directory exists
+      file:
+        path: "{{ build_dir }}"
+        state: directory
+
+    - name: Copy WAR file to build directory
+      copy:
+        src: "{{ war_source }}"
+        dest: "{{ build_dir }}/abc.war"
+
+    - name: Copy Dockerfile to build directory
+      copy:
+        src: "{{ dockerfile_src }}"
+        dest: "{{ build_dir }}/Dockerfile"
+
+    - name: Build Docker image
+      community.docker.docker_image:
+        build:
+          path: "{{ build_dir }}"
+        name: "{{ image_name }}"
+        push: no
+
+    - name: Log in to Docker Hub
+      community.docker.docker_login:
+        username: "{{ dockerhub_username }}"
+        password: "{{ dockerhub_password }}"
+
+    - name: Push Docker image to Docker Hub
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        push: yes
+
+    - name: Copy Kubernetes manifest to host
+      copy:
+        src: "{{ k8s_manifest }}"
+        dest: /tmp/deployment.yaml
+
+    - name: Deploy to Kubernetes
+      kubernetes.core.k8s:
+        state: present
+        src: /tmp/deployment.yaml

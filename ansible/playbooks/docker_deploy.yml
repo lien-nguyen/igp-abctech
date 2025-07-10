@@ -1,6 +1,6 @@
 ---
 - name: Build and run Tomcat container with WAR
-  hosts: docker-hosts
+  hosts: docker-host
   become: yes
   vars:
     tomcat_image: tomcat:11.0-jdk17

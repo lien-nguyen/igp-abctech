@@ -7,6 +7,11 @@ pipeline {
         maven 'Maven-3.9.10'
     }
     stages {
+        stage('Deploy to Docker via Ansible') {
+            steps {
+                sh 'ansible-playbook -i ansible/inventory ansible/playbooks/docker_deploy.yml'
+            }
+        }
         stage('Code Checkout') {
             steps {
                 echo 'Checking out code...'
@@ -31,14 +36,33 @@ pipeline {
                 sh 'mvn package'
             }
         }
-        stage('Deploy to Docker (Tomcat) via Ansible') {
+        stage('Docker Build & Push') {
             steps {
-                sh 'ansible-playbook -i ansible/inventory ansible/playbooks/docker_deploy.yml'
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
+                                                    passwordVariable: 'DOCKER_PASSWORD', 
+                                                    usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh '''
+                            docker build -t ${DOCKER_USERNAME}/abc-tomcat-app:latest -f Dockerfile .
+                            echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
+                            docker push ${DOCKER_USERNAME}/abc-tomcat-app:latest
+                        '''
+                    }
+                }
             }
         }
         stage('Deploy to Kubernetes via Ansible') {
             steps {
-                sh 'ansible-playbook -i ansible/inventory ansible/playbooks/k8s_deploy.yml'
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
+                                                passwordVariable: 'DOCKER_PASSWORD', 
+                                                usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh '''
+                            ansible-playbook -i ansible/inventory ansible/playbooks/docker_k8s_deploy.yml \
+                            --extra-vars "dockerhub_username=${DOCKER_USERNAME} dockerhub_password=${DOCKER_PASSWORD}"
+                        '''
+                    }
+                }
             }
         }
     }

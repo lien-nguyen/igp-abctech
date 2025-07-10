@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tomcat-app-pod
+  labels:
+    app: tomcat-app
+spec:
+  containers:
+  - name: tomcat
+    image: tomcat:9.0-jdk11
+    ports:
+    - containerPort: 8080
+    volumeMounts:
+    - name: app-war
+      mountPath: /usr/local/tomcat/webapps/abc.war
+      subPath: abc.war
+  volumes:
+  - name: app-war
+    hostPath:
+      path: /home/ansibleadmin/ABCtechnologies-1.0.war
+      type: File
