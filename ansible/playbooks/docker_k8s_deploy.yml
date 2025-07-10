@@ -1,5 +1,5 @@
 ---
-- name: Build Docker image, push to Docker Hub, and deploy to Kubernetes
+- name: Build and push Docker image
   hosts: docker-server
   become: yes
   vars:
@@ -44,11 +44,21 @@
         name: "{{ image_name }}"
         push: yes
 
-    - name: Copy Kubernetes manifest to host
-      copy:
+    - name: Copy Kubernetes manifest to local
+      fetch:
         src: "{{ k8s_manifest }}"
         dest: /tmp/deployment.yaml
-        remote_src: false
+        flat: yes
+
+- name: Deploy to Kubernetes
+  hosts: k8s-master
+  become: yes
+  tasks:
+    - name: Copy Kubernetes manifest to k8s-master
+      copy:
+        src: /tmp/deployment.yaml
+        dest: /tmp/deployment.yaml
+        remote_src: no
 
     - name: Deploy to Kubernetes
       kubernetes.core.k8s:
