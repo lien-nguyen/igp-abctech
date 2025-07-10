@@ -1,6 +1,6 @@
 docker-server ansible_host={{ DOCKER_HOST_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ DOCKER_SSH_KEY }}
 
-[docker-hosts]
+[docker-host]
 docker-server ansible_host={{ DOCKER_HOST_IP }} ansible_user=ansibleadmin ansible_ssh_private_key_file={{ DOCKER_SSH_KEY }}
 
 [jenkins-servers]

@@ -3,9 +3,9 @@
   hosts: docker-host
   become: yes
   vars:
-    dockerhub_username: "<your_dockerhub_username>"
-    dockerhub_password: "<your_dockerhub_password>"
-    image_name: "<your_dockerhub_username>/abc-tomcat-app:latest"
+    dockerhub_username: "{{ dockerhub_username }}"
+    dockerhub_password: "{{ dockerhub_password }}"
+    image_name: "{{ dockerhub_username }}/abc-tomcat-app:latest"
     war_source: /home/ansibleadmin/ABCtechnologies-1.0.war
     build_dir: /tmp/docker_build
     dockerfile_src: /home/ansibleadmin/Dockerfile
