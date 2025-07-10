@@ -11,7 +11,7 @@ archived/
 PIPELINE_SETUP.md
 
 # Monitoring folder (keep local, don't track)
-monitoring/
+#monitoring/
 
 # Ignore Ansible environment file
 ansible.env
