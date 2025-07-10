@@ -56,11 +56,7 @@
         name: "{{ image_name }}"
         push: yes
 
-    - name: Copy Kubernetes manifest to local
-      fetch:
-        src: "{{ k8s_manifest }}"
-        dest: /tmp/deployment.yaml
-        flat: yes
+    # Removed fetch task; manifest will be copied directly from control node to k8s-master
 
 - name: Deploy to Kubernetes
   hosts: k8s-master
@@ -68,7 +64,7 @@
   tasks:
     - name: Copy Kubernetes manifest to k8s-master
       copy:
-        src: /tmp/deployment.yaml
+        src: "{{ k8s_manifest }}"
         dest: /tmp/deployment.yaml
         remote_src: no
 
