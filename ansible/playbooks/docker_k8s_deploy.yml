@@ -27,6 +27,14 @@
         dest: "{{ build_dir }}/Dockerfile"
         remote_src: false
 
+    - name: List contents of build directory
+      ansible.builtin.shell: ls -l {{ build_dir }}
+      register: build_dir_contents
+
+    - name: Show build directory contents
+      debug:
+        var: build_dir_contents.stdout_lines
+
     - name: Build Docker image
       community.docker.docker_image:
         build:
