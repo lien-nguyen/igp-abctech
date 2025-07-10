@@ -1,6 +1,6 @@
 ---
 - name: Build Docker image, push to Docker Hub, and deploy to Kubernetes
-  hosts: docker-host
+  hosts: docker-server
   become: yes
   vars:
     dockerhub_username: "{{ dockerhub_username }}"
