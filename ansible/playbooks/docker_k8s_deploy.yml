@@ -37,6 +37,7 @@
 
     - name: Build Docker image
       community.docker.docker_image:
+        source: build
         build:
           path: "{{ build_dir }}"
           dockerfile: Dockerfile
