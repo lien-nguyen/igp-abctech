@@ -1,4 +1,7 @@
+
 ---
+
+
 - name: Build and push Docker image
   hosts: docker-server
   become: yes
@@ -9,7 +12,6 @@
     war_source: /var/lib/jenkins/workspace/Task4-CICD-Deploy-with-Ansible/target/ABCtechnologies-1.0.war
     build_dir: /tmp/docker_build
     dockerfile_src: "{{ playbook_dir }}/../../Dockerfile"
-    k8s_manifest: "{{ playbook_dir }}/../../k8s/deployment.yaml"
   tasks:
     - name: Ensure build directory exists
       file:
@@ -61,6 +63,8 @@
 - name: Deploy to Kubernetes
   hosts: k8s-master
   become: yes
+  vars:
+    k8s_manifest: "{{ playbook_dir }}/../../k8s/deployment.yaml"
   tasks:
     - name: Copy Kubernetes manifest to k8s-master
       copy:
