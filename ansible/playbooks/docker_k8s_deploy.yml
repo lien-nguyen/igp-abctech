@@ -39,8 +39,10 @@
       community.docker.docker_image:
         build:
           path: "{{ build_dir }}"
+          dockerfile: Dockerfile
         name: "{{ image_name }}"
         push: no
+      become: false
 
     - name: Log in to Docker Hub
       community.docker.docker_login:
