@@ -52,6 +52,7 @@
 
     - name: Push Docker image to Docker Hub
       community.docker.docker_image:
+        source: local
         name: "{{ image_name }}"
         push: yes
 
