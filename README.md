@@ -1,6 +1,6 @@
 
 
-# ABCtechnologies Monitoring & Automation Project
+# DevOps Project - ABCtechnologies Monitoring & Automation 
 
 This is a final DevOps project that implements a complete monitoring and automation stack for multiple AWS EC2 instances. The solution uses Prometheus, Node Exporter, Grafana, Jenkins, Docker, and Ansible to provide automated deployment, CI/CD, and real-time system and application monitoring across the infrastructure.
 
