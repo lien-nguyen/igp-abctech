@@ -1,0 +1,59 @@
+// Jenkinsfile for building and testing a Java project using Maven
+// This version is designed to run on a Jenkins master node and a build agent node.
+
+pipeline
+{
+    agent none  // Don't use any default agent
+    tools {
+        maven 'Maven-3.9.10'
+    }
+    stages 
+    {
+        stage('Code Checkout') 
+        {
+            agent { label 'built-in' }  // Run on built-in master node
+            steps 
+            {
+                echo 'Checking out code on master node...'
+                git branch: 'main', url: 'https://github.com/lien-nguyen/igp-abctech.git'
+                // Archive the workspace to share with slave
+                stash includes: '**/*', name: 'source-code'
+            }
+        }
+        stage('Code Compile') 
+        {
+            agent { label 'build-agent' }  // Run on build-agent
+            steps 
+            {
+                echo 'Compiling on build-agent node...'
+                // Retrieve the source code from master
+                unstash 'source-code'
+                sh 'mvn compile'
+            }
+        }
+        stage('Unit Test') 
+        {
+            agent { label 'build-agent' }  // Run on build-agent
+            steps 
+            {
+                echo 'Testing on build-agent node...'
+                // Get the source code (including compiled classes)
+                unstash 'source-code'
+                sh 'mvn compile test'
+            }
+        }
+        stage('Code Packaging') 
+        {
+            agent { label 'build-agent' }  // Run on build-agent
+            steps 
+            {
+                echo 'Packaging on build-agent node...'
+                // Get the source code
+                unstash 'source-code'
+                sh 'mvn compile package'
+                // Archive the built artifacts / save the WAR file
+                archiveArtifacts artifacts: 'target/*.war', fingerprint: true
+            }
+        }
+    }
+}
