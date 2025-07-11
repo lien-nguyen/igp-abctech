@@ -5,6 +5,7 @@
 .settings/
 .vscode/
 .project
+archived/
 
 # Documentation files
 PIPELINE_SETUP.md
@@ -19,3 +20,10 @@ ansible.env
 ansible/playbooks/cicd-pipeline.yml
 ansible/playbooks/setup-hosts.yml
 ansible/playbooks/k8s-deploy.yml
+
+# Ignore unused Kubernetes manifests
+k8s/app-deployment.yaml
+k8s/app-pod-service.yaml
+k8s/app-pod.yaml
+k8s/app-service.yaml
+k8s/namespace.yaml
