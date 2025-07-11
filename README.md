@@ -12,7 +12,7 @@ This is a final DevOps project that implements a complete automation-deplyment s
 - **Node Exporter** (and **cAdvisor**) collect system and container metrics
 - **Jenkins** integrated for CI/CD pipeline automation
 - **Ansible** automates the deployment process to k8s
-- **EKS** Deploy the web app to k8s
+- **EKS** deploys the web app to k8s
 
 ## Architecture
 
