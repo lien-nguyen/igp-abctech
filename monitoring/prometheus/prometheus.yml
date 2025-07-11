@@ -29,28 +29,32 @@ scrape_configs:
           - "172.31.29.239:9100"  # monitoring
           - "172.31.23.250:9100"  # jenkins-server
 
+
   # Scrape cAdvisor metrics
   - job_name: "cadvisor"
     static_configs:
-      - targets: ["cadvisor:8080"]
+      - targets: ["localhost:8080"]
+
 
   # Scrape Docker daemon metrics (if configured)
   - job_name: "docker-daemon"
     static_configs:
-      - targets: ["host.docker.internal:9323"]
+      - targets: ["localhost:9323"]
     scrape_interval: 30s
     metrics_path: /metrics
+
 
   # Application metrics (if your Java app exposes metrics)
   - job_name: "java-app"
     static_configs:
-      - targets: ["host.docker.internal:8081"]  # Adjust port as needed
+      - targets: ["localhost:8081"]  # Adjust port as needed
     scrape_interval: 30s
     metrics_path: /actuator/prometheus  # Spring Boot actuator endpoint
+
 
   # Jenkins metrics (if Jenkins exposes metrics)
   - job_name: "jenkins"
     static_configs:
-      - targets: ["host.docker.internal:8080"]  # Jenkins default port
+      - targets: ["localhost:8080"]  # Jenkins default port
     scrape_interval: 60s
     metrics_path: /prometheus/
