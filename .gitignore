@@ -15,3 +15,8 @@ PIPELINE_SETUP.md
 
 # Ignore Ansible environment file
 ansible.env
+
+# Ignore unused Ansible playbooks
+ansible/playbooks/cicd-pipeline.yml
+ansible/playbooks/setup-hosts.yml
+ansible/playbooks/k8s-deploy.yml
