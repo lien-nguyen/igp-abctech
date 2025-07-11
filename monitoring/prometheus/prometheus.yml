@@ -55,6 +55,6 @@ scrape_configs:
   # Jenkins metrics (if Jenkins exposes metrics)
   - job_name: "jenkins"
     static_configs:
-      - targets: ["localhost:8080"]  # Jenkins default port
+      - targets: ["172.31.23.250:8080"]  # Jenkins default port
     scrape_interval: 60s
     metrics_path: /prometheus/
