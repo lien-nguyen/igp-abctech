@@ -5,13 +5,9 @@
 .settings/
 .vscode/
 .project
-archived/
 
 # Documentation files
 PIPELINE_SETUP.md
-
-# Monitoring folder (keep local, don't track)
-#monitoring/
 
 # Ignore Ansible environment file
 ansible.env
@@ -27,3 +23,19 @@ k8s/app-pod-service.yaml
 k8s/app-pod.yaml
 k8s/app-service.yaml
 k8s/namespace.yaml
+
+# Ignore Ansible environment file
+ansible.env
+
+# Monitoring: ignore unused or generated files
+monitoring/archived/
+monitoring/*.bak
+monitoring/*.tmp
+monitoring/*.log
+monitoring/*~
+monitoring/grafana/provisioning/dashboards/*.bak
+monitoring/grafana/provisioning/dashboards/*.tmp
+monitoring/grafana/provisioning/dashboards/*~
+monitoring/grafana/provisioning/datasources/*.bak
+monitoring/grafana/provisioning/datasources/*.tmp
+monitoring/grafana/provisioning/datasources/*~
