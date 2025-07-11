@@ -10,10 +10,9 @@ ansible/
 ├── inventory                   # Inventory file with host definitions
 ├── vault_pass.template         # Template for vault password file
 ├── playbooks/
-│   ├── setup-hosts.yml         # Setup Docker and K8s hosts
-│   ├── docker-deploy.yml       # Deploy to Docker containers
-│   ├── k8s-deploy.yml          # Deploy to Kubernetes
-│   └── cicd-pipeline.yml       # Complete CI/CD pipeline
+│   ├── docker-k8s-deploy.yml   # Used for Task 4 (Docker & K8s deployment)
+│   ├── node_exporter_install_quick.yml # Used for monitoring setup
+│   └── docker-deploy.yml       # Deploy to Docker containers (if needed)
 └── templates/
     └── Dockerfile.j2           # Docker image template
 ```
@@ -34,11 +33,11 @@ ansible/
 
 ### 1. Install Ansible on Control Node
 
-Run the installation script on your Jenkins server:
+
+Run the installation script on EC2 Ansible control node:
 
 ```bash
-cd /home/lien/edureka/igp-abctech
-sudo ./scripts/install-ansible.sh
+sudo ./scripts/create_user.sh
 ```
 
 This will:
@@ -49,17 +48,11 @@ This will:
 
 ### 2. Setup Target Hosts
 
-On each target host, run the setup script:
+On each target host, run the setup script, for example:
 
 ```bash
 # For Docker hosts
 sudo ./scripts/setup-target-host.sh docker "ssh-rsa AAAAB3NzaC1yc2E... ansibleadmin@jenkins"
-
-# For Kubernetes master
-sudo ./scripts/setup-target-host.sh k8s-master "ssh-rsa AAAAB3NzaC1yc2E... ansibleadmin@jenkins"
-
-# For Kubernetes workers
-sudo ./scripts/setup-target-host.sh k8s-worker "ssh-rsa AAAAB3NzaC1yc2E... ansibleadmin@jenkins"
 ```
 
 ### 3. Configure Inventory
@@ -73,11 +66,11 @@ nano inventory
 ```
 
 Update these placeholders:
-- `<DOCKER_HOST_IP>` - IP of your Docker host
-- `<K8S_MASTER_IP>` - IP of your Kubernetes master
+- `<DOCKER_HOST_IP>` - IP of Docker host
+- `<K8S_MASTER_IP>` - IP of Kubernetes master
 - `<K8S_WORKER1_IP>` - IP of first Kubernetes worker
 - `<K8S_WORKER2_IP>` - IP of second Kubernetes worker
-- `<JENKINS_HOST_IP>` - IP of your Jenkins server
+- `<JENKINS_HOST_IP>` - IP of Jenkins server
 
 ### 4. Setup Vault Password
 
@@ -101,37 +94,31 @@ ansible all -i inventory -m ping
 
 ## Playbooks
 
-### 1. setup-hosts.yml
-Sets up Docker and Kubernetes hosts with required packages and configurations.
+
+## Playbooks
+
+### 1. docker_k8s_deploy.yml
+Used for Task 4: Deploys application to Docker and Kubernetes cluster.
 
 ```bash
-ansible-playbook -i inventory playbooks/setup-hosts.yml
+ansible-playbook -i inventory playbooks/docker_k8s_deploy.yml \
+  --extra-vars "build_number=123"
 ```
 
-### 2. docker-deploy.yml
-Builds Docker image and deploys container to Docker hosts.
+### 2. node_exporter_install_quick.yml
+Used for monitoring setup: Installs and configures Node Exporter on target hosts.
 
 ```bash
-ansible-playbook -i inventory playbooks/docker-deploy.yml \
+ansible-playbook -i inventory playbooks/node_exporter_install_quick.yml
+```
+
+### 3. docker_deploy.yml (optional - if you implement this step prior to implement k8s-stack)
+Builds Docker image and deploys container to Docker hosts (if needed).
+
+```bash
+ansible-playbook -i inventory playbooks/docker_deploy.yml \
   --extra-vars "war_file_path=/path/to/ABCtechnologies-1.0.war" \
   --extra-vars "build_number=123"
-```
-
-### 3. k8s-deploy.yml
-Deploys application to Kubernetes cluster.
-
-```bash
-ansible-playbook -i inventory playbooks/k8s-deploy.yml \
-  --extra-vars "build_number=123"
-```
-
-### 4. cicd-pipeline.yml
-Runs complete CI/CD pipeline (Docker + K8s deployment).
-
-```bash
-ansible-playbook -i inventory playbooks/cicd-pipeline.yml \
-  --extra-vars "build_number=123" \
-  --extra-vars "workspace=/var/lib/jenkins/workspace/ABCTech-Pipeline"
 ```
 
 ## Jenkins Integration
@@ -148,7 +135,7 @@ The Jenkins pipeline supports these parameters:
 
 ### Usage in Jenkins
 
-1. **Use the new pipeline file**: Copy `jenkinsfile-ansible` to replace your existing `jenkinsfile`
+1. **Use the new pipeline file**: Copy `archived/jenkinsfile-ansible` to replace the existing `Jenkinsfile` in the project root
 
 2. **Configure Jenkins credentials**:
    - Add SSH credentials for ansibleadmin
@@ -233,13 +220,18 @@ The deployment creates these Kubernetes resources:
    - Use horizontal pod autoscaling
    - Monitor resource usage
 
-## Next Steps
 
-1. **Implement monitoring** using Prometheus/Grafana (already configured)
-2. **Add security scanning** to the pipeline
-3. **Implement blue-green deployments**
-4. **Add automated rollback** capabilities
-5. **Configure log aggregation** (ELK stack)
+## Notes
+
+### Removed/Unused Playbooks
+The following playbooks were previously included but are now ignored and not tracked in git:
+- cicd-pipeline.yml
+- setup-hosts.yml
+- k8s-deploy.yml
+These files are not part of the current solution and have been excluded for clarity and relevance.
+
+### Monitoring
+Prometheus and Grafana are set up using direct installation and systemd services, not Docker Compose. This approach was chosen to learn manual setup and service management. However, you can also use the provided docker-compose.yml file to set up these services if you prefer containerized deployment.
 
 ## Support
 
