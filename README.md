@@ -22,7 +22,7 @@ See the [Ansible README](ansible/README.md) for detailed playbooks and setup gui
 ### AWS Instances
 
 ![AWS Instances](images/aws-instances.png)  
-*This diagram shows the six EC2 instances provisioned for the DevOps stack plus three t1.small nodes in the k8s-cluster:*
+*This creenshot shows the six EC2 instances provisioned for the DevOps stack plus three t1.small nodes in the k8s-cluster:*
 - **docker-host**: Runs Docker (and cAdvisor)
 - **tomcat-server**: Hosts the Java web application
 - **ansible-host**: Used for automation and orchestration
@@ -40,7 +40,7 @@ See the [Ansible README](ansible/README.md) for detailed playbooks and setup gui
 ### Kubernetes Cluster via CloudFormation
 
 ![Kubernetes Cluster CloudFormation](images/k8s-cloudformation.png)  
-*This diagram shows the Kubernetes cluster created using AWS CloudFormation, automating the provisioning of three t1.small nodes and related resources for scalable container orchestration.*
+*This screenshot shows the Kubernetes cluster created using AWS CloudFormation, automating the provisioning of three t1.small nodes and related resources for scalable container orchestration.*
 
 ### Prometheus & Node Exporter
 
