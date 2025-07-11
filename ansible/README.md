@@ -228,7 +228,10 @@ The following playbooks were previously included but are now ignored and not tra
 - cicd-pipeline.yml
 - setup-hosts.yml
 - k8s-deploy.yml
+
 These files are not part of the current solution and have been excluded for clarity and relevance.
+
+For Task 4, I did not create separate pod and configmap manifest files for Kubernetes. This was mainly due to time constraints and the need to focus on automating the core monitoring stack and CI/CD setup. Only the essential configuration files (deployment.yaml and service.yaml) required for the main project tasks were included and tracked in the repository, as these are necessary for defining the application's deployment and service in the cluster. Unused or example manifests were ignored to keep the codebase clean and relevant.
 
 ### Monitoring
 Prometheus and Grafana are set up using direct installation and systemd services, not Docker Compose. This approach was chosen to learn manual setup and service management. However, you can also use the provided docker-compose.yml file to set up these services if you prefer containerized deployment.
