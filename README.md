@@ -57,6 +57,11 @@ See the [Ansible README](ansible/README.md) for detailed playbooks and setup gui
 ![Jenkins](images/jenkins.png)  
 *Jenkins is integrated for CI/CD automation and exposes metrics for monitoring.*
 
+### Dockerhub
+
+![Built Docker Image](images/dockerhub.png)  
+*Images built and pushed to Docker Repository by Jenkins.*
+
 ---
 
 ## 🧪 Tools Used
